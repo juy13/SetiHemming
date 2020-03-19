@@ -2,7 +2,9 @@
 //
 
 #include <stdio.h>
+#include "stdlib.h"
 #include <math.h>
+#include <string.h>
 #define BYTE unsigned char 
 
 void to_bin(int came, int *ind, BYTE *arr)
@@ -21,12 +23,46 @@ void Hemming(int len_w, BYTE *came, int len_came)
 {
 	int counter = 0;
 	int power = 0;
+	int blocks = 0;
+	int itter = 0;
+	BYTE *arr_t = NULL;
 	while (power <= len_w)
 	{
 		counter++;
 		power = pow(2, counter);
 	}
 	printf("%d\n", counter);
+	BYTE *pows = (BYTE*)calloc(counter, sizeof(BYTE));
+	int block_len = len_w + counter;
+	if (len_came % block_len == 0)
+	{
+		blocks = len_came / block_len;
+		arr_t = (BYTE*)malloc(block_len * sizeof(BYTE));
+	}
+	else
+	{
+		//I don't know
+	}
+	int counter2 = 0;
+	for (int i = 0; i < blocks; i++)
+	{
+		power = 0;
+		//counter2 = 0;
+		memcpy(arr_t, came + i, block_len);
+		for (int j = 0; j < counter; j++)
+		{
+			power = pow(2, j);
+			for (int k = power - 1; k < block_len;)
+			{
+				for (int m = 0; m < power; m++, k++)
+				{
+					if (arr_t[k] == 1)
+						pows[j] += 1;
+				}
+				k += power;
+			}
+		}
+	}
 }
 
 
@@ -49,7 +85,8 @@ int main()
 			printf("\n");
 		}
 	}*/
-	Hemming(12, NULL, 0);
+	Hemming(12, arr, sizeof(msg) * 8 * sizeof(BYTE));
+	free(arr);
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
