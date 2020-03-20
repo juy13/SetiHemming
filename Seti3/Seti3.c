@@ -6,6 +6,15 @@
 #include <math.h>
 #include <string.h>
 #define BYTE unsigned char 
+#define TRUE 1
+#define FALSE 0
+
+typedef struct pair
+{
+	BYTE amount;
+	short int count;
+	BYTE flag;
+}pair;
 
 void to_bin(int came, int *ind, BYTE *arr)
 {
@@ -19,6 +28,63 @@ void to_bin(int came, int *ind, BYTE *arr)
 	*ind += 8;
 }
 
+void verify_arr(BYTE* came_v, int block_len, int counter, BYTE* arr_out)
+{
+	int power = 0;
+	int flag = TRUE;
+	pair *pows = (pair*)calloc(counter, sizeof(pair));
+	//BYTE *pows_real = (BYTE*)calloc(counter, sizeof(BYTE));
+	for (int j = 0; j < counter; j++)
+	{
+		power = pow(2, j);
+		pows[j].count = power;
+		for (int k = power - 1; k < block_len;)
+		{
+			for (int m = 0; m < power; m++, k++)
+			{
+				if (came_v[k] == 1)
+					pows[j].amount += 1;
+			}
+			k += power;
+		}
+	}
+
+	for (int j = 0; j < counter; j++)
+	{
+		if (came_v[pows[j].count - 1] == (pows[j].amount % 2))
+		{
+			pows[j].flag = TRUE;
+		}
+		else
+		{
+			pows[j].flag = FALSE;
+			flag = FALSE;
+		}
+	}
+
+	if (flag == TRUE)
+	{
+		for (int i = 0, j = 0, it = 0; i < block_len; i++)
+		{
+			if (pows[j].count - 1 == i)
+			{
+				j++;
+				continue;
+			}
+			else
+			{
+				arr_out[it] = came_v[i];
+				it++;
+			}
+		}
+	}
+	if (flag == FALSE)
+	{
+		//here we are doing somthing interesting
+	}
+	return arr_out;
+}
+
 void Hemming(int len_w, BYTE *came, int len_came)
 {
 	int counter = 0;
@@ -26,14 +92,16 @@ void Hemming(int len_w, BYTE *came, int len_came)
 	int blocks = 0;
 	int itter = 0;
 	BYTE *arr_t = NULL;
+	
 	while (power <= len_w)
 	{
 		counter++;
 		power = pow(2, counter);
 	}
 	printf("%d\n", counter);
-	BYTE *pows = (BYTE*)calloc(counter, sizeof(BYTE));
+	
 	int block_len = len_w + counter;
+	BYTE *arr_out = (BYTE*)malloc(block_len - counter * sizeof(BYTE));
 	if (len_came % block_len == 0)
 	{
 		blocks = len_came / block_len;
@@ -49,19 +117,7 @@ void Hemming(int len_w, BYTE *came, int len_came)
 		power = 0;
 		//counter2 = 0;
 		memcpy(arr_t, came + i, block_len);
-		for (int j = 0; j < counter; j++)
-		{
-			power = pow(2, j);
-			for (int k = power - 1; k < block_len;)
-			{
-				for (int m = 0; m < power; m++, k++)
-				{
-					if (arr_t[k] == 1)
-						pows[j] += 1;
-				}
-				k += power;
-			}
-		}
+		verify_arr(arr_t, block_len, counter, arr_out); //save in new array
 	}
 }
 
